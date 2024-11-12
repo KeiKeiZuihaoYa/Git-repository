@@ -1,13 +1,13 @@
 #include <bits/stdc++.h>
 using namespace std;
 #define ll long long
-typedef pair<int, int> P;
 const int inf = 0x3f3f3f3f << 1;
-const int N = 1e7 + 10, M = 1e4;
+const int N = 1e7 + 10, M = 2e4, P = 6000, mod = 1e9 + 7;
 
 int d = 0;
 int p[M] = {0};
 int f[M] = {1, 1};
+int num[P][P];
 
 void init()
 {
@@ -34,10 +34,16 @@ void init()
             }
         }
     }
-    for (int i = 0; i < d; i++)
-    { // 打印1到n的质数
-        cout << p[i] << ' ';
-    }
+    // for (int i = 0; i < d; i++)
+    // { // 打印1到n的质数
+    //     cout << p[i] << ' ';
+    // }
+
+    // katelin
+    num[0][0] = 1;
+    for (int i = 1; i <= d; i++)
+        for (int j = 1; j <= i; j++)
+            num[i][j] = (num[i - 1][j - 1] + num[i - 1][j] * j) % mod;
 }
 
 signed main()
@@ -49,7 +55,28 @@ signed main()
     while (t--)
     {
         cin >> n >> k;
-        
+        map<int, int> mp;
+        for (int i = 0; i < d && n > 1; i++)
+        {
+            while (n % p[i] == 0 && n > 1)
+            {
+                mp[p[i]]++;
+                n /= p[i];
+            }
+        }
+        // for (auto i : mp)
+        //     cout << i.first << " " << i.second << '\n';
+        k = min(k, (int)mp.size());
+        int res = num[mp.size()][k];
+        for (auto &i : mp)
+        {
+            int now = i.second;
+            if (i.second == 1)
+                continue;
+            now--;
+            res = (res + (now * 2) % mod) % mod;
+        }
+        cout << res % mod << '\n';
     }
     return 0;
 }

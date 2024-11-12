@@ -1,71 +1,54 @@
 #include <bits/stdc++.h>
 using namespace std;
-
-struct TreeNode
-{
-    int val;
-    TreeNode *left = nullptr;
-    TreeNode *right = nullptr;
-    TreeNode() : val(0), left(nullptr), right(nullptr) {}
-    TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
-    TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
-};
-
-TreeNode *root;
-
-vector<int> v;
-int dfs(TreeNode *x)
-{
-    if (x == nullptr)
-        return 0;
-
-    int left = -1, right = -1;
-    if (x->left != nullptr)
-        left = dfs(x->left);
-    if (x->right != nullptr)
-        right = dfs(x->right);
-
-    if (left == right)
-    {
-        v.push_back(left + right + 1);
-        return left + right + 1;
-    }
-    else
-    {
-        v.push_back(-1);
-        return -1;
-    }
-}
-int kthLargestPerfectSubtree(TreeNode *root, int k)
-{
-    dfs(root);
-    sort(v.begin(), v.end(), less<int>());
-    for (auto i : v)
-        cout << i << ' ';
-    return v[k];
-}
-
-void build(TreeNode *&now)
-{
-    int tmp;
-    cin >> tmp;
-    if (tmp = -1)
-        return;
-    else
-    {
-        now = new TreeNode;
-        now->val = tmp;
-        build(now->left);
-        build(now->right);
-    }
-}
+#define ll long long
+#define endl '\n'
 
 signed main()
 {
     ios::sync_with_stdio(0), cin.tie(0), cout.tie(0);
-    build(root);
-    int k;
-    cin >> k;
-    cout << kthLargestPerfectSubtree(root, k);
+    ll t;
+    cin >> t;
+    while (t--)
+    {
+        ll n, tmp2, mark = 1;
+
+        cin >> n;
+        cin.ignore();
+        double tmp1 = pow(n, 0.5);
+        string s;
+        getline(cin, s);
+        if (tmp1 - (ll)tmp1 == 0)
+        {
+            int lineTot = (int)tmp1; // 一行的个数
+
+            vector<string> v;
+            for (int i = 0; i < s.length(); i += lineTot)
+                v.push_back(s.substr(i, lineTot));
+
+            for (int i = 0; i < v.size(); i++)
+            {
+                if (i == 0 || i == v.size() - 1) // 是否是第一行或最后一行
+                {
+                    for (auto j : v[i])
+                        if (j == '0') // false
+                            goto FALSE;
+                }
+                else
+                {
+                    if (v[i].front() != '1' || v[i].back() != '1')
+                        goto FALSE;
+
+                    for (int j = 1; j < v[i].length() - 1; j++) // 中间的部分
+                        if (v[i][j] == '0')
+                            goto FALSE;
+                }
+            }
+            cout << "Yes" << '\n';
+        }
+        else
+        FALSE:
+            cout << "No" << '\n';
+    }
+
     return 0;
 }

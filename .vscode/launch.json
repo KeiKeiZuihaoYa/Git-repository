@@ -2,6 +2,20 @@
     "configurations": [
         {
             "type": "java",
+            "name": "RollingDice",
+            "request": "launch",
+            "mainClass": "RollingDice",
+            "projectName": "Git-repository_530459d5"
+        },
+        {
+            "type": "java",
+            "name": "tmp",
+            "request": "launch",
+            "mainClass": "tmp",
+            "projectName": "Git-repository_530459d5"
+        },
+        {
+            "type": "java",
             "name": "Shop",
             "request": "launch",
             "mainClass": "Shop",
