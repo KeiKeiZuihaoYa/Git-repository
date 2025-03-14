@@ -1,51 +1,78 @@
 #include <bits/stdc++.h>
 using namespace std;
-#define ll long long
+#define int long long
+
+int fx[4] = {0, 1, 0, -1};
+int fy[4] = {1, 0, -1, 0};
+
+int n, m, h;
+int a, b, c, d;
+struct node
+{
+    int x, y, dis;
+    bool operator<(const node &t) const
+    {
+        return dis > t.dis;
+    }
+};
 
 signed main()
 {
-    ll t;
-    cin >> t;
-    queue<ll> q;
-    ll a, b;
-    ll dis[10000];
-    ll vis[10000];
-    while (t--)
-    {
+    // ios::sync_with_stdio(0), cin.tie(0), cout.tie(0);
 
-        ll n, d;
-        cin >> n >> d;
-        ll cnt = 0;
-        vector<vector<ll>> edge(n + 10);
-        vector<ll> dian(n + 10);
-        for (ll i = 0; i < n - 1; i++)
+    // cin >> n >> m >> h;
+    // cin >> a >> b >> c >> d;
+    scanf("%d %d %d", &n, &m, &h);
+    scanf("%d %d %d %d", &a, &b, &c, &d);
+
+    vector<vector<int>> v(n, vector<int>(m));
+    vector<vector<int>> dis(n, vector<int>(m, 1e9));
+    for (auto &vec : v)
+        for (auto &i : vec)
+            scanf("%d", &i);
+
+    int res;
+    vector<vector<bool>> vis(n, vector<bool>(m, false));
+    priority_queue<node> pq;
+    pq.push({a, b, v[a][b]});
+
+    while (!pq.empty())
+    {
+        node f = pq.top();
+        pq.pop();
+
+        if (vis[f.x][f.y])
+            continue;
+        vis[f.x][f.y] = true;
+
+        if (f.x == c && f.y == d)
         {
-            cin >> a >> b;
-            edge[a].push_back(b);
-            edge[b].push_back(a);
+            res = f.dis;
+            break;
         }
-        q.push(0);
-        ll f = q.front();
-        while (!q.empty())
+
+        for (int i = 0; i < 4; i++)
         {
-            for (auto i : edge[f])
+            int nx = f.x + fx[i];
+            int ny = f.y + fy[i];
+
+            if (nx >= 0 && ny >= 0 && nx < n && ny < m && !vis[nx][ny])
             {
-                if (vis[i] == 1)
-                {
-                    continue;
-                }
-                q.push(i);
-                dis[i] = dis[f] + 1;
+                int nd = f.dis + v[nx][ny];
+                pq.push({nx, ny, nd});
             }
-            vis[f] = 1;
-            q.pop();
         }
-        for (ll j = 0; j < n; j++)
-        {
-            if (dis[j] > 2)
-                cnt++;
-        }
-        cout << cnt;
+    }
+
+    if (res >= h)
+    {
+        cout << "ohno\n";
+        cout << res - h + 1;
+    }
+    else
+    {
+        cout << "zako~zako~\n";
+        cout << h - res;
     }
 
     return 0;

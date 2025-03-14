@@ -1,0 +1,15 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+typedef pair<int, int> P;
+const int inf = 0x3f3f3f3f << 1;
+
+signed main()
+{
+    ios::sync_with_stdio(0), cin.tie(0), cout.tie(0);
+    string a = "bca";
+    vector<int> v;
+    sort(v.begin(), v.end());
+    sort(s.begin(), s.end());
+    return 0;
+}
