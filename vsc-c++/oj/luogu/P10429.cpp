@@ -1,12 +1,6 @@
 #include <bits/stdc++.h>
 using namespace std;
-#define ll long long
-typedef pair<int, int> P;
-const int inf = 0x3f3f3f3f << 1;
-
-vector<ll> sum;
-vector<set<ll>> vs;
-vector<set<ll>> vb;
+#define int long long
 
 signed main()
 {
@@ -14,38 +8,49 @@ signed main()
 
     int n;
     cin >> n;
-    vs.resize(n);
-    vb.resize(n);
-    vector<ll> v(n);
-
-    for (auto &i : v)
+    vector<int> sum(n), a(n);
+    for (auto &i : a)
         cin >> i;
+    sum[0] = a[0];
+    for (int i = 1; i < n; i++)
+        sum[i] = a[i] + sum[i - 1];
 
-    set<ll> nows;
-    for (int i = n - 1; i >= 0; --i)
+    multiset<int> nowRightTotal;
+    unordered_map<int, multiset<int>> mps;
+
+    for (int i = 1; i < n; ++i)
     {
-        vector<ll> tmp;
-        tmp.push_back(v[i]);
-
-        for (auto &j : nows)
-            tmp.push_back(j + v[i]);
-
-        for (auto &j : tmp)
-            nows.insert(j);
-        vs[i].insert(nows.begin(), nows.end());
+        for (int j = i; j < n; ++j)
+            mps[i].insert(sum[j] - sum[i - 1]);
+        nowRightTotal.insert(mps[i].begin(), mps[i].end());
     }
 
-    nows.clear();
-    for (int i = 0; i < n; i++)
+    int ans = LONG_LONG_MAX;
+    for (int t = 0; t < n - 1; t++) // r0
     {
-        vector<ll> tmp;
-        tmp.push_back(v[i]);
+        for (auto &i : mps[t])
+            nowRightTotal.erase(nowRightTotal.find(i));
+        mps.erase(t);
 
-        for (auto &j : nows)
-            tmp.push_back(j + v[i]);
-        for (auto &j : tmp)
-            nows.insert(j);
+        for (int l = 0; l <= t; ++l)
+        {
+            int nowsum = sum[t] - (l ? sum[l - 1] : 0);
+            auto it = nowRightTotal.lower_bound(nowsum);
+            if (nowsum == *it)
+            {
+                ans = 0;
+                goto br;
+            }
+            ans = min(ans, abs(nowsum - *(it)));
+            if (it != nowRightTotal.begin())
+            {
+                --it;
+                ans = min(ans, abs(nowsum - *(it)));
+            }
+        }
     }
+br:
+    cout << ans;
 
     return 0;
 }
