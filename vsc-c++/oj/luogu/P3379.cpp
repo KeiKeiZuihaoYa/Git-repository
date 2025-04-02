@@ -3,30 +3,28 @@ using namespace std;
 
 struct node
 {
-    int fa, son, dep, size, top;
+    int top, size, dep, fa, son;
 };
 
-int n;
+int n, m, s;
 vector<node> v;
 vector<vector<int>> edge;
 
-// process unless top
-void dfs1(int cur, int f)
+void dfs1(int cur, int fa)
 {
-    v[cur].dep = v[f].dep + 1;
-    v[cur].fa = f;
+    v[cur].fa = fa;
+    v[cur].dep = v[fa].dep + 1;
     v[cur].size = 1;
     for (auto &i : edge[cur])
     {
-        if (i == f)
+        if (i == fa)
             continue;
         dfs1(i, cur);
         v[cur].size += v[i].size;
-        v[cur].son = v[v[cur].son].size < v[i].size ? i : v[cur].son;
+        v[cur].son = v[i].size > v[v[cur].son].size ? i : v[cur].son;
     }
 }
 
-// process top
 void dfs2(int cur, int top)
 {
     v[cur].top = top;
@@ -34,12 +32,10 @@ void dfs2(int cur, int top)
         return;
     dfs2(v[cur].son, top);
     for (auto &i : edge[cur])
-    {
-        if (i == v[cur].son || v[cur].fa)
+        if (i == v[cur].fa || i == v[cur].son)
             continue;
         else
             dfs2(i, i);
-    }
 }
 
 int lca(int n1, int n2)
@@ -57,7 +53,26 @@ signed main()
 {
     ios::sync_with_stdio(0), cin.tie(0), cout.tie(0);
 
+    cin >> n >> m >> s;
     v.resize(n + 1);
+    edge.resize(n + 1);
+
+    for (int i = 1; i < n; i++)
+    {
+        int x, y;
+        cin >> x >> y;
+        edge[x].push_back(y);
+        edge[y].push_back(x);
+    }
+
+    dfs1(s, 0), dfs2(s, s);
+
+    while (m--)
+    {
+        int a, b;
+        cin >> a >> b;
+        cout << lca(a, b) << '\n';
+    }
 
     return 0;
 }

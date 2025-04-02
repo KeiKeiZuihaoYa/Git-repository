@@ -1,40 +1,63 @@
-vector<int> e[N];
-int fa[N], son[N], dep[N], sz[N], top[N];
-void add(int u, int v)
+#include <bits/stdc++.h>
+using namespace std;
+
+struct node
 {
-    e[u].push_back(v);
-    e[v].push_back(u);
-}
-void dfs1(int u, int father) // fa , dep , son || IJi
+    int dep, top, size, fa, son;
+};
+
+int n;
+vector<node> v;
+vector<vector<int>> edge;
+
+// process dep son fa
+void dfs1(int cur, int f)
 {
-    fa[u] = father, dep[u] = dep[father] + 1, sz[u] = 1;
-    for (int v : e[u])
+    v[cur].fa = f;
+    v[cur].size = 1;
+    v[cur].dep = v[f].dep + 1;
+    for (auto &i : edge[cur])
     {
-        if (v == father)
+        if (i == f)
             continue;
-        dfs1(v, u);
-        sz[u] += sz[v];
-        if (sz[son[u]] < sz[v])
-            son[u] = v; 
+        dfs1(i, cur);
+        v[cur].size += v[i].size;
+        v[cur].son = (v[v[cur].son].size < v[i].size ? i : v[cur].son);
     }
 }
-void dfs2(int u, int t) // top || HakaTTe
+
+// process top
+void dfs2(int cur, int t)
 {
-    top[u] = t;
-    if (!son[u])
+    v[cur].top = t;
+    if (!v[cur].son)
         return;
-    dfs2(son[u], t);
-    for (int v : e[u])
-        if (v != fa[u] && v != son[u])
-            dfs2(v, v);
-}
-int lca(int u, int v)
-{
-    while (top[u] != top[v])
+    dfs2(v[cur].son, t);
+    for (auto &i : edge[cur])
     {
-        if (dep[top[u]] < dep[top[v]])
-            swap(u, v);
-        u = fa[top[u]];
+        if (i == v[cur].fa || i == v[cur].son)
+            continue;
+        dfs2(i, i);
     }
-    return dep[u] < dep[v] ? u : v;
+}
+
+int lca(int n1, int n2)
+{
+    while (v[n1].top != v[n2].top)
+    {
+        if (v[v[n1].top].dep < v[v[n2].top].dep)
+            swap(n1, n2);
+        n1 = v[v[n1].top].fa;
+    }
+    return v[n1].dep < v[n2].dep ? n1 : n2;
+}
+
+signed main()
+{
+    ios::sync_with_stdio(0), cin.tie(0), cout.tie(0);
+
+    cin >> n;
+    v.resize(n + 1);
+
+    return 0;
 }
