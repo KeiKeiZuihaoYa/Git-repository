@@ -1,101 +1,110 @@
 #include <bits/stdc++.h>
 using namespace std;
-#define ll long long
 #define int long long
-typedef pair<int, int> Pii;
-const int inf = 1e18;
-const int N = 1e5 + 10;
 
-int n, m, a[N];
 struct node
 {
-    int sum, l, r, lz;
-} tree[N << 3];
-void build(int k, int l, int r)
+	int lz = 0;
+	int sum = 0;
+};
+
+inline int lc(const int& p) { return p << 1; }
+inline int rc(const int& p) { return p << 1 | 1; }
+
+int n, m;
+vector<int> a;
+vector<node> t;
+
+inline void pushup(const int& p)
 {
-    tree[k].l = l;
-    tree[k].r = r;
-    tree[k].lz = 0;
-    if (l == r)
-    {
-        tree[k].sum = a[l];
-        return;
-    }
-    int mid, lc, rc;
-    mid = (l + r) >> 1;
-    lc = k << 1;
-    rc = lc | 1;
-    build(lc, l, mid);
-    build(rc, mid + 1, r);
-    tree[k].sum = tree[lc].sum + tree[rc].sum;
+	t[p].sum = t[lc(p)].sum + t[rc(p)].sum;
 }
-inline void lazy(int k, int v)
+
+inline void lazy(const int& p, int l, int r, int lz)
 {
-    tree[k].lz += v;
-    tree[k].sum += v * (tree[k].r - tree[k].l + 1);
+	t[p].lz += lz;
+	t[p].sum += (r - l + 1) * lz;
 }
-void pushdown(int k)
+
+void pushdown(const int& p, int l, int r)
 {
-    int tmp = k << 1;
-    lazy(tmp, tree[k].lz);
-    lazy(tmp + 1, tree[k].lz);
-    tree[k].lz = 0;
+	int mid = (l + r) >> 1;
+	lazy(lc(p), l, mid, t[p].lz);
+	lazy(rc(p), mid + 1, r, t[p].lz);
+	t[p].lz = 0;
 }
-void update(int k, int l, int r, int v) // a[l-r] = v;
+
+void build(int id, int l, int r)
 {
-    if (l <= tree[k].l && tree[k].r <= r)
-    {
-        lazy(k, v);
-        return;
-    }
-    if (tree[k].lz)
-        pushdown(k);
-    int mid, lc, rc;
-    mid = (tree[k].l + tree[k].r) >> 1;
-    lc = k << 1;
-    rc = lc | 1;
-    if (l <= mid)
-        update(lc, l, r, v);
-    if (r > mid)
-        update(rc, l, r, v);
-    tree[k].sum = tree[lc].sum + tree[rc].sum;
+	if (l == r)
+	{
+		t[id].sum = a[l];
+		return;
+	}
+
+	int mid = (l + r) >> 1;
+	build(lc(id), l, mid);
+	build(rc(id), mid + 1, r);
+	pushup(id);
 }
-int query(int k, int l, int r)
+
+void update(int id, int l, int r, int ql, int qr, int val)
 {
-    if (l <= tree[k].l && tree[k].r <= r)
-        return tree[k].sum;
-    if (tree[k].lz)
-        pushdown(k);
-    int mid, lc, rc, sum = 0;
-    mid = (tree[k].l + tree[k].r) >> 1;
-    lc = k << 1;
-    rc = lc + 1;
-    if (l <= mid)
-        sum += query(lc, l, r);
-    if (r > mid)
-        sum += query(rc, l, r);
-    return sum;
+	if (ql <= l && r <= qr)
+	{
+		t[id].lz += val;
+		t[id].sum += (r - l + 1) * val;
+		return;
+	}
+
+	pushdown(id, l, r);
+	int mid = (l + r) >> 1;
+	if (ql <= mid)
+		update(lc(id), l, mid, ql, qr, val);
+	if(mid < qr)
+		update(rc(id), mid + 1, r, ql, qr, val);
+	pushup(id);
+}
+
+int query(int id, int l, int r, int ql, int qr)
+{
+	if (ql <= l && r <= qr) { return t[id].sum; }
+
+	pushdown(id, l, r);
+	int mid = (l + r) >> 1, res = 0;
+	if (ql <= mid)
+		res += query(lc(id), l, mid, ql, qr);
+	if (mid < qr)
+		res += query(rc(id), mid + 1, r, ql, qr);
+	return res;
 }
 
 signed main()
 {
-    ios::sync_with_stdio(0), cin.tie(0), cout.tie(0);
-    cin >> n >> m;
-    for (int i = 1; i <= n; i++)
-        cin >> a[i];
+	ios::sync_with_stdio(false), cin.tie(0), cout.tie(0);
 
-    build(1, 1, n);
-    int op, x, y, k;
-    while (m--)
-    {
-        cin >> op >> x >> y;
-        if (op == 1)
-        {
-            cin >> k;
-            update(1, x, y, k);
-        }
-        else
-            cout << query(1, x, y) << "\n";
-    }
-    return 0;
+	cin >> n >> m;
+	a.resize(n + 1);
+	t.resize((n + 1) << 2);
+
+	for (int i = 1; i <= n; i++)
+		cin >> a[i];
+	build(1, 1, n);
+
+	int op, x, y, k;
+	while (m--)
+	{
+		cin >> op >> x >> y;
+		if (op == 1)
+		{
+			cin >> k;
+			update(1, 1, n, x, y, k);
+		}
+		else
+		{
+			cout << query(1, 1, n, x, y) << '\n';
+		}
+	}
+
+	return 0;
 }
