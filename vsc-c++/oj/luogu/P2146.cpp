@@ -1,21 +1,18 @@
 #include <bits/stdc++.h>
 using namespace std;
-#define ll long long
-typedef pair<int, int> P;
+const int N = 200005;
 
 struct nodeL
 {
     int top, size, fa, son, dep, dfn;
-};
+} vl[N];
 struct nodeS
 {
-    int sum, lz;
-};
+    int sum = 0, lz = -1;
+} vs[N << 2];
 
 int n, m, tim;
-vector<nodeL> vl;
-vector<nodeS> vs;
-vector<vector<int>> e;
+vector<int> e[N];
 
 void dfs1(int cur, int fa)
 {
@@ -29,7 +26,7 @@ void dfs1(int cur, int fa)
             continue;
         dfs1(i, cur);
         vl[cur].size += vl[i].size;
-        vl[cur].son = vl[cur].son < vl[i].size ? i : vl[cur].son;
+        vl[cur].son = vl[vl[cur].son].size < vl[i].size ? i : vl[cur].son;
     }
 }
 
@@ -50,44 +47,27 @@ void dfs2(int cur, int top)
 
 inline int lc(const int &p) { return p << 1; }
 inline int rc(const int &p) { return p << 1 | 1; }
-
 inline void pushup(const int &p) { vs[p].sum = vs[lc(p)].sum + vs[rc(p)].sum; }
-inline void lazy(int p, int l, int r, int lz)
-{
-    vs[p].lz = lz;
-    if (lz == 1)
-        vs[p].sum = r - l + 1;
-    else
-        vs[p].sum = 0;
-}
+inline void lazy(int p, int l, int r, int lz) { vs[p].lz = lz, vs[p].sum = lz * (r - l + 1); }
 
 void pushdown(const int &p, const int &l, const int &r)
 {
-    if (vs[p].lz == 0)
-        return;
-
     int m = (l + r) >> 1;
     lazy(lc(p), l, m, vs[p].lz);
     lazy(rc(p), m + 1, r, vs[p].lz);
-    vs[p].lz = 0;
+    vs[p].lz = -1;
 }
 
 void update(int id, int l, int r, int ql, int qr, int val)
 {
     if (ql <= l && r <= qr)
     {
-        if (val == 1)
-            vs[id].sum = (r - l + 1);
-        else
-            vs[id].sum = 0;
+        vs[id].sum = val * (r - l + 1);
         vs[id].lz = val;
         return;
     }
-
-    if (vs[id].lz == val)
-        return;
-
-    pushdown(id, l, r);
+    if (vs[id].lz != -1)
+        pushdown(id, l, r);
     int m = (l + r) >> 1;
     if (ql <= m)
         update(lc(id), l, m, ql, qr, val);
@@ -96,57 +76,82 @@ void update(int id, int l, int r, int ql, int qr, int val)
     pushup(id);
 }
 
+int query(int p, int l, int r, int ql, int qr)
+{
+    if (ql <= l && r <= qr)
+        return vs[p].sum;
+
+    if (vs[p].lz != -1)
+        pushdown(p, l, r);
+    int m = (l + r) >> 1, res = 0;
+    if (ql <= m)
+        res += query(lc(p), l, m, ql, qr);
+    if (m < qr)
+        res += query(rc(p), m + 1, r, ql, qr);
+    return res;
+}
+
 int install(int cur)
 {
-    int before = vs[1].sum, after = 0;
-    while (cur)
+    int t = vs[1].sum;
+    while (vl[cur].top != 1)
     {
-        update(1, 1, n, vl[vl[cur].top].dfn, vl[vl[cur].top].dfn + vl[cur].dep - vl[vl[cur].top].dep, 1);
-        cur = vl[vl[cur].top].fa;
+        int nowtop = vl[cur].top;
+        update(1, 1, n, vl[nowtop].dfn, vl[cur].dfn, 1);
+        cur = vl[nowtop].fa;
     }
-    after = vs[1].sum;
-    return after - before;
+    update(1, 1, n, 1, vl[cur].dfn, 1);
+    return abs(t - vs[1].sum);
 }
 
 int uninstall(int cur)
 {
-    int before = vs[1].sum, after;
-    update(1, 1, n, vl[cur].dfn, vl[cur].dfn + vl[cur].size - 1, -1);
-    after = vs[1].sum;
-    return before - after;
+    int ans = vs[1].sum;
+    update(1, 1, n, vl[cur].dfn, vl[cur].dfn + vl[cur].size - 1, 0);
+    return abs(ans - vs[1].sum);
+}
+
+int read()
+{
+    char ch = getchar();
+    int res = 0, w = 1;
+    while (ch < '0' || ch > '9')
+    {
+        if (ch == '-')
+            w = -1;
+        ch = getchar();
+    }
+    while (ch >= '0' && ch <= '9')
+    {
+        res = res * 10 + ch - '0';
+        ch = getchar();
+    }
+    return res * w;
 }
 
 signed main()
 {
-    ios::sync_with_stdio(0), cin.tie(0), cout.tie(0);
+    // ios::sync_with_stdio(0), cin.tie(0), cout.tie(0);
 
-    cin >> n;
-    vl.resize(n + 1);
-    e.resize(n + 1);
-    vs.resize((n + 1) << 2, {0, 0});
-    for (int i = 1, tmp; i < n; i++)
+    n = read();
+    for (int i = 2, tmp; i <= n; i++)
     {
-        cin >> tmp;
-        if (tmp == 0)
-            tmp = n;
+        tmp = read() + 1;
         e[tmp].push_back(i);
-        e[i].push_back(tmp);
     }
 
-    dfs1(n, 0), dfs2(n, n);
-    cin >> m;
+    dfs1(1, 1), dfs2(1, 1);
+    m = read();
     string op;
     int x;
     while (m--)
     {
-        cin >> op >> x;
-        if (!x)
-            x = n;
+        cin >> op;
+        x = read() + 1;
         if (op[0] == 'i')
-            cout << install(x);
+            printf("%d\n", install(x));
         else
-            cout << uninstall(x);
-        cout << '\n';
+            printf("%d\n", uninstall(x));
     }
 
     return 0;

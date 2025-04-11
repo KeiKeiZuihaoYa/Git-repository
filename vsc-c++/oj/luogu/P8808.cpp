@@ -1,11 +1,8 @@
 #include <bits/stdc++.h>
 using namespace std;
-typedef pair<int, int> P;
 #define ll long long
+typedef pair<int, int> P;
 const int inf = 0x3f3f3f3f << 1;
-
-int fx[8] = {1, -1, 0, 0, -1, -1, 1, 1};
-int fy[8] = {0, 0, -1, 1, -1, 1, 1, -1};
 
 signed main()
 {
